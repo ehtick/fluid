@@ -338,6 +338,21 @@ namespace Fluid.Tests
             Assert.Equal(expected, result.ToStringValue());
         }
 
+        [Fact]
+        public async Task DateLargeFormat()
+        {
+            const int Repetitions = 100_000;
+            var format = string.Concat(Enumerable.Repeat("%D", Repetitions));
+            var input = new DateTimeValue(new DateTimeOffset(2017, 8, 1, 0, 0, 0, TimeSpan.Zero));
+
+            var result = await MiscFilters.Date(
+                input,
+                new FilterArguments(new StringValue(format)),
+                new TemplateContext());
+
+            Assert.Equal(Repetitions * 8, result.ToStringValue().Length);
+        }
+
         [Theory]
         [InlineData("2020-05-18T12:00:00+01:00", "%l:%M%P", "12:00pm")]
         [InlineData("2020-05-18T08:00:00+01:00", "%l:%M%P", " 8:00am")]
@@ -723,6 +738,15 @@ namespace Fluid.Tests
             var result = await MiscFilters.Handleize(input, arguments, context);
 
             Assert.Equal(expected, result.ToStringValue());
+        }
+
+        [Fact]
+        public async Task HandleizeLargeInput()
+        {
+            var value = new string('a', 377_000);
+            var result = await MiscFilters.Handleize(new StringValue(value), new FilterArguments(), new TemplateContext());
+
+            Assert.Equal(value, result.ToStringValue());
         }
 
         [Theory]
